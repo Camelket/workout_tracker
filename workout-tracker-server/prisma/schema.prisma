@@ -1,0 +1,163 @@
+// schema.prisma
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL") // Replace with your actual database URL
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+enum Units {
+  metric
+  imperial
+}
+
+enum PerceivedGrade {
+  A
+  B
+  C
+  D
+  E
+}
+
+enum AccuracyLevel {
+  high
+  medium
+  low
+}
+
+model User {
+  userId          Int               @id @default(autoincrement())
+  name            String
+  email           String            @unique
+  passwordHash    String
+  preferences     UserPreferences?
+  heartRateZones  HeartRateZone[]
+  thresholds      Threshold[]
+  macroPlans      MacroPlan[]
+  activities      Activity[]
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+}
+
+model UserPreferences {
+  userId Int     @id
+  units  Units
+  user   User    @relation(fields: [userId], references: [userId])
+
+  // Add createdAt and updatedAt if needed
+}
+
+model HeartRateZone {
+  zoneId     Int      @id @default(autoincrement())
+  userId     Int
+  name       String
+  lowerBound Float
+  upperBound Float
+  createdAt  DateTime   @default(now())
+  updatedAt  DateTime   @updatedAt
+
+  user       User       @relation(fields: [userId], references: [userId])
+}
+
+model Threshold {
+  thresholdId                 Int      @id @default(autoincrement())
+  userId                      Int
+  lactateThreshold            Float
+  aerobicExhaustionThreshold  Float
+  effectiveDate               DateTime
+  createdAt                   DateTime  @default(now())
+  updatedAt                   DateTime  @updatedAt
+
+  user                        User      @relation(fields: [userId], references: [userId])
+}
+
+model MacroPlan {
+  planId      Int        @id @default(autoincrement())
+  userId      Int
+  title       String
+  description String
+  startDate   DateTime
+  endDate     DateTime
+  planUnits   PlanUnit[]
+  planEvents  PlanEvent[]
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  user        User       @relation(fields: [userId], references: [userId])
+}
+
+model PlanEvent {
+  eventId     Int       @id @default(autoincrement())
+  planId      Int
+  title       String
+  date        DateTime
+  description String
+
+  macroPlan   MacroPlan @relation(fields: [planId], references: [planId])
+}
+
+model PlanUnit {
+  unitId            Int              @id @default(autoincrement())
+  planId            Int
+  weekNumber        Int
+  startDate         DateTime
+  endDate           DateTime
+  notes             String
+  plannedActivities PlannedActivity[]
+
+  macroPlan         MacroPlan        @relation(fields: [planId], references: [planId])
+}
+
+model PlannedActivity {
+  plannedActivityId Int       @id @default(autoincrement())
+  unitId            Int
+  date              DateTime
+  activityType      String
+  distance          Float     // in kilometers
+  verticalGain      Float     // in meters
+  duration          Float     // in minutes
+  notes             String
+
+  planUnit          PlanUnit  @relation(fields: [unitId], references: [unitId])
+  activities        Activity[]
+}
+
+model Activity {
+  activityId                   Int               @id @default(autoincrement())
+  userId                       Int
+  plannedActivityId            Int?
+  startTime                    DateTime
+  endTime                      DateTime
+  activityType                 String
+  perceivedGrade               PerceivedGrade
+  userNotes                    String
+  distance                     Float             // From ActivityMetadata
+  verticalGain                 Float             // From ActivityMetadata
+  duration                     Float             // From ActivityMetadata
+  source                       String            // From ActivityMetadata
+  manualOverride               Boolean           // From ActivityMetadata
+  startLatitude                Float
+  startLongitude               Float
+  startTimestamp               DateTime
+  endLatitude                  Float
+  endLongitude                 Float
+  endTimestamp                 DateTime
+  lactateThreshold             Float             // Thresholds at the time of activity
+  aerobicExhaustionThreshold   Float             // Thresholds at the time of activity
+  gpsData                      Json
+  accelerationData             Json
+  gyroData                     Json
+  routeData                    Json
+  heartRateData                Json
+  zonesSummary                 Json
+  zonesUsed                    Json
+  thresholds                   Json
+  createdAt                    DateTime          @default(now())
+  updatedAt                    DateTime          @updatedAt
+
+  user                         User              @relation(fields: [userId], references: [userId])
+  plannedActivity              PlannedActivity?  @relation(fields: [plannedActivityId], references: [plannedActivityId])
+}
