@@ -30,7 +30,6 @@ enum AccuracyLevel {
 
 model User {
   userId          Int               @id @default(autoincrement())
-  name            String
   email           String            @unique
   passwordHash    String
   preferences     UserPreferences?

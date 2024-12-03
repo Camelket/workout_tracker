@@ -13,6 +13,7 @@ export interface User {
   }
   
   export interface UserPreferences {
+    userId: number;
     units: 'metric' | 'imperial';
     // Heart rate zones and thresholds are associated via userId
   }
@@ -117,7 +118,15 @@ export interface User {
     thresholds: Threshold[]; // Thresholds at the time of the activity
     createdAt: Date;
     updatedAt: Date;
+    startEndPoints: StartEndPoints;
   }
+
+  export interface StartEndPoints {
+    start: TimePoint;
+    end: TimePoint;
+  }
+
+  // Activity 
   
   // Activity Metadata
   
@@ -128,14 +137,21 @@ export interface User {
     source: string; // e.g., 'manual', 'device_a', 'average'
     manualOverride: boolean;
   }
+
+  export interface Point {
+    latitude: number;
+    longitude: number;
+  }
+
+  export interface TimePoint extends Point {
+    timestamp: Date;
+  }
   
   // GPS Data Point
   
   export interface GPSDataPoint {
-    latitude: number;
-    longitude: number;
+    point: TimePoint;
     altitude: number;
-    timestamp: Date;
     accuracy: "high" | "medium" | "low";
   }
 
@@ -158,10 +174,8 @@ export interface User {
   }
 
   export interface RouteDataPoint {
-    latitude: number;
-    longitude: number;
+    point: TimePoint;
     altitude: number;
-    timestamp: Date;
     velocity?: number; // Optional: speed at this point (m/s)
     heading?: number;  // Optional: direction of movement in degrees
     accuracy?: number; // Optional: estimated accuracy of position (meters)
