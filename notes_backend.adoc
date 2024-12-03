@@ -1,0 +1,10 @@
+:toc: auto
+
+# Backend
+
+
+## data formats
+- create a backend data format (hearrate, accel, gyro) which makes sense and ideally uses an already existing standard, which one?
+
+
+## architecture

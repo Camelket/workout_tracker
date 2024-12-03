@@ -1,0 +1,59 @@
+:toc: auto
+
+# Frontend
+
+## Mvp screens
+- macroplan view (editor mode, view mode)
+- weekly plan (editor mode, view mode)
+- weekly overview of tracked acitivity
+- weekly overview of upcoming planned activities
+- single endurance activity form
+- data export screen
+
+## Problems
+- display multiple metrics in a single macroplan view (could go 3d or a simple toggle)
+
+- export format for data? What are the standards?
+       Standards: TCX, FIT, GPX
+       Use Sdks from product if needed
+
+
+
+- How do i best get/fetch fine granularity location data?
+get (aggregate) Use: dead reckoning, maybe kalman filters 
+fetch Use: permissions for fine grained gps data
+
+
+## library choices
+- What map provider should I use? (Google, open street map (is that even an option?))
+
+## Activity Considerations
+- how to associate user input data with fitness tracker data like Heartrate
+- How to enable ability to track a single activity and enrich at the end with userinput
+- how to enable ability to track a session after the fact ( user input first, then add fitness tracker data)
+- merge data from different data sources (eg: mobile and tracker) ?
+
+
+## fitness tracker access
+
+### trackers without direct BLE connection
+- fitbit
+
+
+### trackers with BLE connection and open standard
+- polar
+- garmin
+
+#### data formats by tracker
+[cols="1,1"]
+|===
+|Format
+|Trackers 
+
+|FIT
+|
+
+|TCX
+|
+
+|=== 
