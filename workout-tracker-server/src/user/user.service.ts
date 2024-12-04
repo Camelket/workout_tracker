@@ -2,14 +2,36 @@
 
 import { Injectable, ConflictException, InternalServerErrorException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { RegistrationRequestDto } from '../user/dtos/registration-request.dto';
+import { RegistrationRequestDto as RegistrationRequest } from '../user/dtos/registration-request.dto';
 import * as bcrypt from 'bcrypt';
+import { UserPasswordLoginRequest as EmailPasswordLoginRequest } from './dtos/user-password-login-request';
+import { GenericService } from 'src/commons/generic-crud-model-service';
+import { Prisma, User } from '@prisma/client';
+const saltRounds = 10; 
 
 @Injectable()
-export class UserService {
-  constructor(private prisma: PrismaService) {}
+export class UserService extends GenericService<
+    User,  
+    Prisma.UserWhereUniqueInput,
+    Prisma.UserWhereInput,
+    Prisma.UserCreateInput,
+    Prisma.UserUpdateInput,
+    Prisma.UserOrderByWithRelationInput> {
+  constructor(protected prisma: PrismaService) {
+    super(prisma, prisma.user);
+  }
 
-  async register(data: RegistrationRequestDto) {
+  async validateEmailPasswordCredentials(data: EmailPasswordLoginRequest): Promise<boolean> {
+    const {email, password} = data;
+    const existingUser = await this.prisma.user.findUnique({where: {email}});
+    if (existingUser) {
+      return false;
+    }
+    const isValid = await bcrypt.compare(password, existingUser.passwordHash);
+    return isValid;
+  }
+
+  async register(data: RegistrationRequest) {
     const { email, password } = data;
 
     try {
@@ -23,7 +45,6 @@ export class UserService {
       }
 
       // Hash the password
-      const saltRounds = 10;
       const hashedPassword = await bcrypt.hash(password, saltRounds);
 
       // Create the user with the hashed password
